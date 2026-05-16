@@ -1,1464 +1,1094 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uz">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Накладной — Blok Hisob</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="theme-color" content="#C8970A" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Sarbast" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<title>Sarbast — Blok Hisob</title>
+
 <style>
-body {
-    font-family: Arial, sans-serif;
-    background: #f0f2f5;
-    padding: 15px;
-    margin:0;
-}
-h2 {
-    text-align: center;
-    font-size: 42px;
-    color: #2c3e50;
-    margin: 20px 0;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-}
-.tabs {
+  :root {
+    --gold: #C8970A;
+    --gold-light: #F5C518;
+    --dark: #1A1A2E;
+    --dark2: #16213E;
+    --card: #0F3460;
+    --card-bg: #1e2d4a;
+    --text: #FFFFFF;
+    --muted: #8892A4;
+    --danger: #E74C3C;
+    --success: #2ECC71;
+    --radius: 14px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bot: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: -apple-system, 'Segoe UI', sans-serif;
+    background: var(--dark);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── TOP NAV ─────────────────────────────── */
+  .topbar {
+    background: var(--dark2);
+    border-bottom: 2px solid var(--gold);
+    padding: calc(var(--safe-top) + 14px) 16px 12px;
     display: flex;
-    gap: 8px;
-    margin-bottom: 15px;
-}
-.tab {
-    flex: 1;
-    padding: 18px 5px;
-    font-size: 22px;
-    text-align: center;
-    background: #bdc3c7;
-    border-radius: 15px 15px 0 0;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar .logo {
+    font-size: 20px;
+    font-weight: 800;
+    color: var(--gold-light);
+    letter-spacing: 2px;
+  }
+  .topbar .logo span { color: var(--muted); font-size: 12px; display: block; font-weight: 400; letter-spacing: 1px; }
+
+  .reset-btn {
+    background: transparent;
+    border: 1px solid var(--muted);
+    color: var(--muted);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
     cursor: pointer;
-    transition: all 0.3s;
-    font-weight: bold;
-}
-.tab:hover { background: #95a5a6; }
-.tab.active {
-    background: #27ae60;
-    color: white;
-    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
-}
-.tab-content {
+    transition: all .2s;
+  }
+  .reset-btn:active { background: var(--danger); border-color: var(--danger); color: #fff; }
+
+  /* ── TABS ────────────────────────────────── */
+  .tabs {
+    display: flex;
+    background: var(--dark2);
+    border-bottom: 1px solid #2a3550;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex: 0 0 auto;
+    padding: 12px 20px;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+    transition: all .2s;
+  }
+  .tab-btn.active { color: var(--gold-light); border-bottom-color: var(--gold); }
+
+  /* ── MAIN CONTENT ────────────────────────── */
+  .page { display: none; padding: 12px 12px calc(var(--safe-bot) + 80px); }
+  .page.active { display: block; }
+
+  /* ── PRODUCT GRID ────────────────────────── */
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 16px 4px 8px;
+  }
+
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .product-card {
+    background: var(--card-bg);
+    border: 1px solid #2a3550;
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform .15s, border-color .15s;
+    position: relative;
+  }
+  .product-card:active { transform: scale(0.97); }
+  .product-card.selected {
+    border-color: var(--gold);
+    background: #1c2e4a;
+  }
+  .product-card .check {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    background: var(--gold);
+    border-radius: 50%;
     display: none;
-    background: white;
-    padding: 20px;
-    border-radius: 0 0 20px 20px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
-}
-.tab-content.active { display: block; }
-.product {
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    z-index: 2;
+  }
+  .product-card.selected .check { display: flex; }
+
+  .product-card img {
+    width: 100%;
+    height: 110px;
+    object-fit: contain;
+    background: #fff;
+    padding: 6px;
+  }
+  .product-card .info {
+    padding: 8px 10px;
+  }
+  .product-card .pname {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 4px;
+  }
+  .product-card .pvol {
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .product-card .pprice {
+    font-size: 11px;
+    color: var(--gold-light);
+    font-weight: 700;
+    margin-top: 4px;
+  }
+
+  /* ── NAKŁADNOY PAGE ──────────────────────── */
+  .nakladnoy-header {
+    background: linear-gradient(135deg, var(--dark2), #0d1b35);
+    border: 1px solid #2a3550;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .nakladnoy-header h2 {
+    font-size: 16px;
+    color: var(--gold-light);
+    margin-bottom: 4px;
+  }
+  .nakladnoy-header p { font-size: 12px; color: var(--muted); }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  /* Item rows */
+  .nakladnoy-item {
+    background: var(--card-bg);
+    border: 1px solid #2a3550;
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .nakladnoy-item img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 8px;
+    flex-shrink: 0;
+    padding: 3px;
+  }
+  .nakladnoy-item .iname {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .nakladnoy-item .iprice { font-size: 11px; color: var(--gold); }
+
+  .qty-control {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .qty-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: var(--dark);
+    color: var(--text);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s;
+  }
+  .qty-btn:active { background: var(--gold); color: var(--dark); }
+  .qty-val {
+    width: 32px;
+    text-align: center;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    background: transparent;
+    border: none;
+    outline: none;
+  }
+
+  .remove-btn {
+    background: transparent;
+    border: none;
+    color: #e74c3c55;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px;
+    flex-shrink: 0;
+    transition: color .2s;
+  }
+  .remove-btn:active { color: var(--danger); }
+
+  /* Total box */
+  .total-box {
+    background: linear-gradient(135deg, #0d1b35, var(--dark2));
+    border: 2px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin: 12px 0;
+  }
+  .total-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin: 18px 0;
-    font-size: 22px;
-    padding: 15px;
-    border-radius: 10px;
-    background: #f8f9fa;
-    transition: all 0.3s;
-}
-.product:hover {
-    background: #e9ecef;
-    transform: translateX(5px);
-}
-.product-info {
+    margin-bottom: 6px;
+  }
+  .total-label { font-size: 12px; color: var(--muted); }
+  .total-value { font-size: 13px; font-weight: 700; color: var(--text); }
+  .total-row.main .total-label { font-size: 14px; color: var(--text); font-weight: 700; }
+  .total-row.main .total-value { font-size: 18px; color: var(--gold-light); }
+  .total-divider { border: none; border-top: 1px solid #2a3550; margin: 8px 0; }
+
+  /* Discount selector */
+  .discount-section { margin: 12px 0; }
+  .discount-title {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .discount-options {
     display: flex;
-    flex-direction: column;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .disc-btn {
     flex: 1;
-}
-.product-name {
-    font-weight: bold;
-    color: #2c3e50;
-}
-.product-volume {
-    font-size: 18px;
-    color: #7f8c8d;
-    margin-top: 5px;
-}
-.product-price {
-    font-size: 18px;
-    color: #27ae60;
-    font-weight: bold;
-    margin-top: 5px;
-}
-.product input {
-    width: 110px;
-    height: 55px;
-    font-size: 26px;
-    text-align: center;
+    min-width: 80px;
+    padding: 10px 8px;
     border-radius: 10px;
-    border: 2px solid #ccc;
-    transition: all 0.3s;
-}
-.product input:focus {
-    border-color: #27ae60;
-    box-shadow: 0 0 8px rgba(39, 174, 96, 0.3);
-    outline: none;
-}
-.buttons {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin: 25px 0;
-}
-button {
-    padding: 18px 10px;
-    font-size: 20px;
-    border: none;
-    border-radius: 12px;
+    border: 1px solid #2a3550;
+    background: var(--card-bg);
+    color: var(--muted);
+    font-size: 11px;
+    text-align: center;
     cursor: pointer;
-    font-weight: bold;
-    transition: all 0.3s;
+    transition: all .2s;
+    line-height: 1.4;
+  }
+  .disc-btn.active {
+    border-color: var(--gold);
+    background: #1c2e4a;
+    color: var(--gold-light);
+  }
+  .disc-btn strong { display: block; font-size: 13px; color: var(--text); }
+  .disc-btn.active strong { color: var(--gold-light); }
+
+  /* Action buttons */
+  .action-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+  .btn-copy {
+    flex: 1;
+    padding: 14px;
+    border-radius: var(--radius);
+    border: none;
+    background: var(--gold);
+    color: var(--dark);
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: opacity .2s;
+    letter-spacing: 1px;
+  }
+  .btn-copy:active { opacity: 0.8; }
+  .btn-save {
+    padding: 14px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--gold);
+    background: transparent;
+    color: var(--gold);
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .btn-save:active { background: var(--gold); color: var(--dark); }
+
+  /* ── OPTOVIY PAGE ────────────────────────── */
+  .opt-card {
+    background: var(--card-bg);
+    border: 1px solid #2a3550;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 10px;
+  }
+  .opt-card h3 {
+    font-size: 14px;
+    color: var(--gold-light);
+    margin-bottom: 4px;
+  }
+  .opt-card .opt-desc { font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .opt-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px solid #1e2d4a;
+    font-size: 12px;
+  }
+  .opt-row:last-child { border-bottom: none; }
+  .opt-row .name { color: var(--text); }
+  .opt-row .disc { color: var(--gold); font-weight: 700; }
+
+  /* ── HISTORY PAGE ────────────────────────── */
+  .hist-item {
+    background: var(--card-bg);
+    border: 1px solid #2a3550;
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color .2s;
+  }
+  .hist-item:active { border-color: var(--gold); }
+  .hist-item .hist-date { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .hist-item .hist-items { font-size: 12px; color: var(--text); margin-bottom: 6px; line-height: 1.6; }
+  .hist-item .hist-total { font-size: 14px; font-weight: 800; color: var(--gold-light); }
+  .hist-actions { display: flex; gap: 8px; margin-top: 8px; }
+  .hist-btn {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #2a3550;
+    background: transparent;
+    color: var(--muted);
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .hist-btn.primary { border-color: var(--gold); color: var(--gold); }
+  .hist-btn:active { background: var(--gold); color: var(--dark); border-color: var(--gold); }
+  .clear-hist-btn {
+    width: 100%;
+    padding: 12px;
+    border-radius: var(--radius);
+    border: 1px solid var(--danger);
+    background: transparent;
+    color: var(--danger);
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 12px;
+  }
+  .clear-hist-btn:active { background: var(--danger); color: #fff; }
+
+  /* ── BOTTOM NAV ──────────────────────────── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--dark2);
+    border-top: 2px solid var(--gold);
+    display: flex;
+    padding-bottom: var(--safe-bot);
+    z-index: 100;
+  }
+  .nav-btn {
+    flex: 1;
+    padding: 10px 4px;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 5px;
-    position: relative;
-    overflow: hidden;
-    min-height: 90px;
-}
-button::after {
-    content: '';
+    gap: 4px;
+    transition: color .2s;
+    letter-spacing: 0.5px;
+  }
+  .nav-btn .icon { font-size: 20px; line-height: 1; }
+  .nav-btn.active { color: var(--gold-light); }
+  .nav-btn .badge {
     position: absolute;
-    top: 50%;
+    top: 6px;
+    right: calc(50% - 22px);
+    background: var(--gold);
+    color: var(--dark);
+    font-size: 9px;
+    font-weight: 900;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .nav-btn { position: relative; }
+
+  /* ── TOAST ───────────────────────────────── */
+  .toast {
+    position: fixed;
+    top: 80px;
     left: 50%;
-    width: 5px;
-    height: 5px;
-    background: rgba(255, 255, 255, 0.5);
+    transform: translateX(-50%) translateY(-20px);
+    background: var(--success);
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 700;
     opacity: 0;
-    border-radius: 100%;
-    transform: scale(1, 1) translate(-50%);
-    transform-origin: 50% 50%;
-}
-button:focus:not(:active)::after {
-    animation: ripple 1s ease-out;
-}
-@keyframes ripple {
-    0% {
-        transform: scale(0, 0);
-        opacity: 0.5;
-    }
-    20% {
-        transform: scale(25, 25);
-        opacity: 0.3;
-    }
-    100% {
-        opacity: 0;
-        transform: scale(40, 40);
-    }
-}
-button:active {
-    transform: scale(0.95);
-}
-.btn-green {
-    background: #27ae60;
-    color: white;
-}
-.btn-green:hover {
-    background: #2ecc71;
-    box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
-}
-.btn-yellow {
-    background: #f39c12;
-    color: white;
-}
-.btn-yellow:hover {
-    background: #f1c40f;
-    box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
-}
-.btn-red {
-    background: #e74c3c;
-    color: white;
-}
-.btn-red:hover {
-    background: #c0392b;
-    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
-}
-.btn-blue {
-    background: #3498db;
-    color: white;
-}
-.btn-blue:hover {
-    background: #2980b9;
-    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
-}
-.btn-purple {
-    background: #9b59b6;
-    color: white;
-}
-.btn-purple:hover {
-    background: #8e44ad;
-    box-shadow: 0 4px 8px rgba(155, 89, 182, 0.3);
-}
-.btn-icon {
-    font-size: 28px;
-    margin-bottom: 5px;
-}
-.btn-text {
-    font-size: 16px;
-    font-weight: 600;
-    text-align: center;
-    line-height: 1.2;
-}
-/* Modal oyna */
-.modal {
-display: none;
-position: fixed;
-z-index: 1000;
-left: 0;
-top: 0;
-width: 100%;
-height: 100%;
-background-color: rgba(0,0,0,0.5);
-animation: fadeIn 0.3s ease;
-}
-@keyframes fadeIn {
-from { opacity: 0; }
-to { opacity: 1; }
-}
-.modal-content {
-background-color: white;
-margin: 5% auto;
-padding: 0;
-border-radius: 15px;
-width: 90%;
-max-width: 500px;
-max-height: 80vh;
-overflow-y: auto;
-box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-animation: slideUp 0.4s ease;
-}
-@keyframes slideUp {
-from { transform: translateY(50px); opacity: 0; }
-to { transform: translateY(0); opacity: 1; }
-}
-.modal-header {
-background: #27ae60;
-color: white;
-padding: 20px;
-border-radius: 15px 15px 0 0;
-text-align: center;
-}
-.modal-title {
-font-size: 28px;
-font-weight: bold;
-}
-.modal-body {
-padding: 25px;
-}
-.nakladnoy-content {
-font-family: monospace;
-font-size: 18px;
-white-space: pre-line;
-text-align: left;
-background: #f8f9fa;
-padding: 20px;
-border-radius: 10px;
-margin: 20px 0;
-border: 1px solid #ddd;
-max-height: 300px;
-overflow-y: auto;
-}
-.modal-buttons {
-display: flex;
-gap: 15px;
-margin-top: 25px;
-}
-.modal-btn {
-padding: 18px;
-font-size: 22px;
-border-radius: 10px;
-border: none;
-cursor: pointer;
-font-weight: bold;
-flex: 1;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 10px;
-transition: all 0.3s;
-}
-.modal-btn:active {
-transform: scale(0.95);
-}
-.modal-btn-copy {
-background: #3498db;
-color: white;
-}
-.modal-btn-copy:hover {
-background: #2980b9;
-box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
-}
-.close-modal {
-position: absolute;
-right: 20px;
-top: 20px;
-font-size: 30px;
-cursor: pointer;
-color: white;
-background: rgba(0,0,0,0.2);
-width: 40px;
-height: 40px;
-border-radius: 50%;
-display: flex;
-align-items: center;
-justify-content: center;
-}
-.close-modal:hover {
-background: rgba(0,0,0,0.3);
-}
+    transition: all .3s;
+    z-index: 999;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* Variant tanlash modal oynasi */
-.option-card {
-background: #f8f9fa;
-padding: 20px;
-margin: 15px 0;
-border-radius: 12px;
-cursor: pointer;
-transition: all 0.3s;
-border: 2px solid transparent;
-text-align: center;
-}
-.option-card:hover {
-background: #e9ecef;
-transform: translateX(5px);
-border-color: #27ae60;
-}
-.option-title {
-font-size: 24px;
-font-weight: bold;
-color: #2c3e50;
-margin-bottom: 10px;
-}
-.option-discount {
-font-size: 32px;
-font-weight: bold;
-color: #e74c3c;
-margin: 10px 0;
-}
-.option-desc {
-color: #7f8c8d;
-font-size: 16px;
-}
-
-.notification {
-position: fixed;
-top: 20px;
-right: 20px;
-background: #2ecc71;
-color: white;
-padding: 15px 25px;
-border-radius: 10px;
-font-weight: bold;
-box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-transform: translateX(150%);
-transition: transform 0.5s ease;
-z-index: 1000;
-}
-.notification.show {
-transform: translateX(0);
-}
-.notification.error {
-background: #e74c3c;
-}
-
-.date-time {
-color: #7f8c8d;
-font-size: 16px;
-margin: 10px 0 20px 0;
-text-align: center;
-}
-.total-line {
-font-weight: bold;
-color: #e74c3c;
-font-size: 22px;
-margin-top: 20px;
-padding-top: 15px;
-border-top: 2px solid #7f8c8d;
-text-align: center;
-}
-.section-title {
-font-weight: bold;
-color: #2c3e50;
-margin: 15px 0 10px 0;
-font-size: 20px;
-padding: 8px 15px;
-background: #ecf0f1;
-border-radius: 5px;
-text-align: center;
-}
-.product-line {
-margin: 10px 0;
-padding-left: 10px;
-}
-.empty-message {
-color: #7f8c8d;
-font-style: italic;
-text-align: center;
-padding: 20px;
-font-size: 18px;
-}
-
-/* Tarix modal */
-.history-list {
-max-height: 400px;
-overflow-y: auto;
-margin: 20px 0;
-}
-.history-item {
-background: #f8f9fa;
-padding: 15px;
-margin: 10px 0;
-border-radius: 10px;
-border-left: 5px solid #27ae60;
-cursor: pointer;
-transition: all 0.3s;
-}
-.history-item:hover {
-background: #e9ecef;
-transform: translateX(5px);
-}
-.history-date {
-font-weight: bold;
-color: #2c3e50;
-margin-bottom: 5px;
-}
-.history-total {
-color: #27ae60;
-font-weight: bold;
-float: right;
-}
-.history-type {
-color: #7f8c8d;
-font-size: 14px;
-}
-
-/* Rasm uslubi */
-.product-image {
-width: 60px;
-height: 60px;
-object-fit: contain;
-margin-right: 15px;
-border-radius: 8px;
-background: #fff;
-padding: 5px;
-box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-cursor: pointer;
-transition: transform 0.3s ease;
-}
-.product-image:hover {
-transform: scale(1.1);
-}
-.product {
-display: flex;
-align-items: center;
-}
-
-/* Rasm modal oynasi */
-.image-modal {
-display: none;
-position: fixed;
-z-index: 2001;
-left: 0;
-top: 0;
-width: 100%;
-height: 100%;
-background-color: rgba(0,0,0,0.9);
-animation: fadeIn 0.3s ease;
-}
-.image-modal-content {
-margin: auto;
-display: block;
-max-width: 90%;
-max-height: 90%;
-position: absolute;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-animation: zoom 0.3s ease;
-}
-@keyframes zoom {
-from { transform: translate(-50%, -50%) scale(0.1); opacity: 0; }
-to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-}
-.close-image-modal {
-position: absolute;
-right: 35px;
-top: 15px;
-color: #f1f1f1;
-font-size: 40px;
-font-weight: bold;
-cursor: pointer;
-transition: 0.3s;
-z-index: 2002;
-}
-.close-image-modal:hover {
-color: #27ae60;
-transform: scale(1.2);
-}
-
-.copy-fallback {
-position: fixed;
-top: 0;
-left: 0;
-width: 100%;
-height: 100%;
-background: rgba(0,0,0,0.8);
-display: none;
-justify-content: center;
-align-items: center;
-z-index: 2000;
-}
-.copy-textarea {
-width: 80%;
-height: 300px;
-padding: 20px;
-font-size: 16px;
-border-radius: 10px;
-border: 2px solid #3498db;
-background: white;
-color: #333;
-font-family: Arial, sans-serif;
-}
+  /* ── INSTALL BANNER ──────────────────────── */
+  #install-banner {
+    background: linear-gradient(135deg, #1c2e4a, var(--dark2));
+    border: 1px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin: 10px 12px 0;
+    display: none;
+    align-items: center;
+    gap: 12px;
+  }
+  #install-banner .ib-text { flex: 1; font-size: 12px; }
+  #install-banner .ib-text strong { display: block; color: var(--gold-light); font-size: 13px; margin-bottom: 2px; }
+  #install-banner .ib-text span { color: var(--muted); }
+  #install-banner button {
+    padding: 8px 16px;
+    border-radius: 20px;
+    border: none;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  #install-banner .btn-install { background: var(--gold); color: var(--dark); }
+  #install-banner .btn-close { background: transparent; color: var(--muted); border: 1px solid #2a3550; margin-left: 4px; }
 </style>
 </head>
 <body>
-<h2>Накладной (Блок)</h2>
-<div class="tabs">
-    <div class="tab active" onclick="openTab('pet')">PET (1.5L)</div>
-    <div class="tab" onclick="openTab('rgb')">RGB (0.5L)</div>
-    <div class="tab" onclick="openTab('can')">CAN (0.45L)</div>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="logo">SARBAST <span>Blok Hisob</span></div>
+  <button class="reset-btn" onclick="resetAll()">🔄 Tozalash</button>
 </div>
 
-<!-- Rasm modal oynasi -->
-<div id="imageModal" class="image-modal" onclick="closeImageModal()">
-    <span class="close-image-modal" onclick="closeImageModal()">&times;</span>
-    <img class="image-modal-content" id="modalImage">
+<!-- INSTALL BANNER -->
+<div id="install-banner">
+  <span style="font-size:32px">📲</span>
+  <div class="ib-text">
+    <strong>Ilovani o'rnating</strong>
+    <span>Telefonga o'rnatib, oflayn ishlating</span>
+  </div>
+  <button class="btn-install" onclick="installPWA()">O'rnatish</button>
+  <button class="btn-close" onclick="hideBanner()">✕</button>
 </div>
 
-<!-- PET -->
-<div id="pet" class="tab-content active">
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/bMzqRx18/sarbast-lite-pet.jpg" alt="Sarbast Lite PET" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Sarbast Lite PET</div>
-            <div class="product-volume">1.5 litr</div>
-            <div class="product-price">115.479 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Sarbast Lite PET" data-sum="115479">
-    </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/S4kty86y/sarbast-original-pet.jpg" alt="Sarbast Original PET" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Sarbast Original PET</div>
-            <div class="product-volume">1.5 litr</div>
-            <div class="product-price">115.479 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Sarbast Original PET" data-sum="115479">
-    </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/WN56c5DV/sarbast-special-pet.jpg" alt="Sarbast Special PET" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Sarbast Special PET</div>
-            <div class="product-volume">1.5 litr</div>
-            <div class="product-price">115.479 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Sarbast Special PET" data-sum="115479">
-    </div>
+<!-- TABS (product categories) -->
+<div class="tabs" id="product-tabs" style="display:none">
+  <button class="tab-btn active" onclick="filterCat('all',this)">Barchasi</button>
+  <button class="tab-btn" onclick="filterCat('PET',this)">PET 1.5L</button>
+  <button class="tab-btn" onclick="filterCat('RGB',this)">RGB</button>
+  <button class="tab-btn" onclick="filterCat('CAN',this)">CAN</button>
 </div>
 
-<!-- RGB -->
-<div id="rgb" class="tab-content">
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/Df36mfB5/sarbast-lite-rgb.jpg" alt="Sarbast Lite RGB" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Sarbast Lite RGB</div>
-            <div class="product-volume">0.5 litr</div>
-            <div class="product-price">218.077 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Sarbast Lite RGB" data-sum="218077">
-    </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/CKB8Smqd/sarbast-original-rgb.jpg" alt="Sarbast Original RGB" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Sarbast Original RGB</div>
-            <div class="product-volume">0.5 litr</div>
-            <div class="product-price">218.077 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Sarbast Original RGB" data-sum="218077">
-    </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/1Yh9rJzD/sarbast-special-rgb.jpg" alt="Sarbast Special RGB" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Sarbast Special RGB</div>
-            <div class="product-volume">0.5 litr</div>
-            <div class="product-price">218.077 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Sarbast Special RGB" data-sum="218077">
-    </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/VWzV4mcZ/tuborg-green-rgb.jpg" alt="Tuborg Green RGB" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Tuborg Green RGB</div>
-            <div class="product-volume">0.5 litr</div>
-            <div class="product-price">268.307 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Tuborg Green RGB" data-sum="268307">
-    </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/HfgDGFrM/tuborg-lite-rgb.jpg" alt="Tuborg Lite RGB" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Tuborg Lite RGB</div>
-            <div class="product-volume">0.45 litr</div>
-            <div class="product-price">268.307 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Tuborg Lite RGB" data-sum="268307">
-    </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/hxSDrBCM/zatecky-gus-svetly-rgb.jpg" alt="Zatecky Gus Svetly RGB" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Zatecky Gus Svetly RGB</div>
-            <div class="product-volume">0.47 litr</div>
-            <div class="product-price">251.632 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Zatecky Gus Svetly RGB" data-sum="251632">
-    </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/7J9mDKmr/zatecky-gus-exportniy-rgb.jpg" alt="Zatecky Gus Exportniy RGB" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Zatecky Gus Exportniy RGB</div>
-            <div class="product-volume">0.47 litr</div>
-            <div class="product-price">251.632 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Zatecky Gus Exportniy RGB" data-sum="251632">
-    </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/vvjXWMB2/carlsberg-pilsner-rgb.jpg" alt="Carlsberg Pilsner RGB" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Carlsberg Pilsner RGB</div>
-            <div class="product-volume">0.45 litr</div>
-            <div class="product-price">301.580 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Carlsberg Pilsner RGB" data-sum="301580">
-    </div>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- PAGES -->
+
+<!-- 1. MAHSULOTLAR -->
+<div class="page active" id="page-products">
+  <div id="product-list"></div>
 </div>
 
-<!-- CAN -->
-<div id="can" class="tab-content">
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/przfWHxv/sarbast-lite-can.jpg" alt="Sarbast Lite CAN" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Sarbast Lite CAN</div>
-            <div class="product-volume">0.45 litr</div>
-            <div class="product-price">241.529 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Sarbast Lite CAN" data-sum="241529">
+<!-- 2. NAKŁADNOY -->
+<div class="page" id="page-nakladnoy">
+  <div class="nakladnoy-header">
+    <h2>📋 Nakładnoy</h2>
+    <p>Mahsulot qo'shish uchun "Mahsulotlar" bo'limiga o'ting</p>
+  </div>
+
+  <div class="discount-section">
+    <div class="discount-title">Chegirma varianti</div>
+    <div class="discount-options">
+      <div class="disc-btn active" onclick="setDiscount(0,this)">
+        <strong>Chegirmasiz</strong>Asosiy narx
+      </div>
+      <div class="disc-btn" onclick="setDiscount(1,this)">
+        <strong>-10% / -5%</strong>PET:10% | Qolgan:5%
+      </div>
+      <div class="disc-btn" onclick="setDiscount(2,this)">
+        <strong>-5% / -5%</strong>Barcha Sarbast:5%
+      </div>
+      <div class="disc-btn" onclick="setDiscount(3,this)">
+        <strong>-8% / -5%</strong>PET:8% | Qolgan:5%
+      </div>
     </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/4HjJZkb/sarbast-original-can.jpg" alt="Sarbast Original CAN" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Sarbast Original CAN</div>
-            <div class="product-volume">0.45 litr</div>
-            <div class="product-price">241.529 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Sarbast Original CAN" data-sum="241529">
+  </div>
+
+  <div id="nakladnoy-items"></div>
+
+  <div class="total-box" id="total-box" style="display:none">
+    <div class="total-row">
+      <span class="total-label">Jami mahsulot</span>
+      <span class="total-value" id="total-qty">0 blok</span>
     </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/0yZjC2C3/sarbast-original-unfiltered-can.jpg" alt="Sarbast Original Unfiltered CAN" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Sarbast Original Unfiltered CAN</div>
-            <div class="product-volume">0.45 litr</div>
-            <div class="product-price">241.529 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Sarbast Original Unfiltered CAN" data-sum="241529">
+    <div class="total-row">
+      <span class="total-label">Chegirmasiz narx</span>
+      <span class="total-value" id="total-base">0 UZS</span>
     </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/1t3Y7bZt/sarbast-special-can.jpg" alt="Sarbast Special CAN" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Sarbast Special CAN</div>
-            <div class="product-volume">0.45 litr</div>
-            <div class="product-price">241.529 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Sarbast Special CAN" data-sum="241529">
+    <div class="total-row" id="discount-row" style="display:none">
+      <span class="total-label">Chegirma</span>
+      <span class="total-value" style="color:#e74c3c" id="total-discount">-0 UZS</span>
     </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/hJJdrTK7/tuborg-green-can.jpg" alt="Tuborg Green CAN" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Tuborg Green CAN</div>
-            <div class="product-volume">0.45 litr</div>
-            <div class="product-price">321.968 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Tuborg Green CAN" data-sum="321968">
+    <hr class="total-divider">
+    <div class="total-row main">
+      <span class="total-label">JAMI TO'LOV</span>
+      <span class="total-value" id="total-final">0 UZS</span>
     </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/SXLx1T0S/tuborg-lite-can.jpg" alt="Tuborg Lite CAN" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Tuborg Lite CAN</div>
-            <div class="product-volume">0.45 litr</div>
-            <div class="product-price">321.968 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Tuborg Lite CAN" data-sum="321968">
-    </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/KjyNrtH3/zatecky-gus-svetly-can.jpg" alt="Zatecky Gus Svetly CAN" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Zatecky Gus Svetly CAN</div>
-            <div class="product-volume">0.45 litr</div>
-            <div class="product-price">301.958 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Zatecky Gus Svetly CAN" data-sum="301958">
-    </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/wNFhH1MQ/zatecky-gus-exportniy-can.jpg" alt="Zatecky Gus Exportniy CAN" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Zatecky Gus Exportniy CAN</div>
-            <div class="product-volume">0.45 litr</div>
-            <div class="product-price">301.958 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Zatecky Gus Exportniy CAN" data-sum="301958">
-    </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/PsyfwQnh/zatecky-gus-krepkiy-can.jpg" alt="Zatecky Gus Krepkiy CAN" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Zatecky Gus Krepkiy CAN</div>
-            <div class="product-volume">0.45 litr</div>
-            <div class="product-price">301.958 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Zatecky Gus Krepkiy CAN" data-sum="301958">
-    </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/sp7s7dP3/zatecky-gus-nefiltrovaniy-can.jpg" alt="Zatecky Gus Nefiltrovaniy CAN" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Zatecky Gus Nefiltrovaniy CAN</div>
-            <div class="product-volume">0.45 litr</div>
-            <div class="product-price">301.958 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Zatecky Gus Nefiltrovaniy CAN" data-sum="301958">
-    </div>
-    <div class="product">
-        <img class="product-image" src="https://i.ibb.co/xS20VDMg/carlsberg-pilsner-can.jpg" alt="Carlsberg Pilsner CAN" onclick="openImageModal(this.src)">
-        <div class="product-info">
-            <div class="product-name">Carlsberg Pilsner CAN</div>
-            <div class="product-volume">0.45 litr</div>
-            <div class="product-price">361.896 UZS/блок</div>
-        </div>
-        <input type="number" min="0" value="0" data-name="Carlsberg Pilsner CAN" data-sum="361896">
-    </div>
+  </div>
+
+  <div class="action-row" id="action-row" style="display:none">
+    <button class="btn-copy" onclick="copyNakladnoy()">📋 Nusxa olish</button>
+    <button class="btn-save" onclick="saveToHistory()">💾</button>
+  </div>
 </div>
 
-<div class="buttons">
-    <button class="btn-green" onclick="showNakladnoyModal()">
-        <div class="btn-icon">📝</div>
-        <div class="btn-text">Накладной</div>
-    </button>
-    <button class="btn-yellow" onclick="showOptavikOptions()">
-        <div class="btn-icon">🏷️</div>
-        <div class="btn-text">Оптовик</div>
-    </button>
-    <button class="btn-blue" onclick="showHistoryModal()">
-        <div class="btn-icon">📚</div>
-        <div class="btn-text">История</div>
-    </button>
-    <button class="btn-red" onclick="resetAll()">
-        <div class="btn-icon">🔄</div>
-        <div class="btn-text">Сброс</div>
-    </button>
+<!-- 3. OPTOVIY -->
+<div class="page" id="page-optoviy">
+  <div class="section-title">Chegirma variantlari</div>
+
+  <div class="opt-card">
+    <h3>Variant 1 — -10% / -5%</h3>
+    <p class="opt-desc">Sarbast PET: 10% | Boshqa Sarbast: 5%</p>
+    <div class="opt-row"><span class="name">Sarbast PET (1.5L)</span><span class="disc">-10%</span></div>
+    <div class="opt-row"><span class="name">Sarbast RGB / CAN</span><span class="disc">-5%</span></div>
+    <div class="opt-row"><span class="name">Tuborg, Zatecky, Carlsberg</span><span class="disc">-</span></div>
+  </div>
+
+  <div class="opt-card">
+    <h3>Variant 2 — -5% / -5%</h3>
+    <p class="opt-desc">Barcha Sarbast mahsulotlari: 5%</p>
+    <div class="opt-row"><span class="name">Sarbast PET (1.5L)</span><span class="disc">-5%</span></div>
+    <div class="opt-row"><span class="name">Sarbast RGB / CAN</span><span class="disc">-5%</span></div>
+    <div class="opt-row"><span class="name">Tuborg, Zatecky, Carlsberg</span><span class="disc">-</span></div>
+  </div>
+
+  <div class="opt-card">
+    <h3>Variant 3 — -8% / -5%</h3>
+    <p class="opt-desc">Sarbast PET: 8% | Boshqa Sarbast: 5%</p>
+    <div class="opt-row"><span class="name">Sarbast PET (1.5L)</span><span class="disc">-8%</span></div>
+    <div class="opt-row"><span class="name">Sarbast RGB / CAN</span><span class="disc">-5%</span></div>
+    <div class="opt-row"><span class="name">Tuborg, Zatecky, Carlsberg</span><span class="disc">-</span></div>
+  </div>
+
+  <div class="section-title">Barcha narxlar (blok)</div>
+  <div id="price-list"></div>
 </div>
 
-<!-- Nakladnoy modal oyna -->
-<div id="nakladnoyModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div class="modal-title" id="modalTitle">НАКЛАДНОЙ</div>
-            <div class="close-modal" onclick="closeModal('nakladnoyModal')">×</div>
-        </div>
-        <div class="modal-body">
-            <div class="date-time" id="modalDateTime"></div>
-            <div class="nakladnoy-content" id="modalNakladnoyContent">
-                <div class="empty-message">Mahsulot tanlang va blok sonini kiriting...</div>
-            </div>
-            <div class="total-line" id="modalTotal"></div>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-copy" onclick="copyNakladnoy()">
-                    <span>📋</span> Копировать
-                </button>
-            </div>
-        </div>
-    </div>
+<!-- 4. TARIX -->
+<div class="page" id="page-history">
+  <div id="history-list"></div>
 </div>
 
-<!-- Optovik variantlarini tanlash modal oynasi -->
-<div id="optavikOptionsModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div class="modal-title">Выберите вариант скидки</div>
-            <div class="close-modal" onclick="closeModal('optavikOptionsModal')">×</div>
-        </div>
-        <div class="modal-body">
-            <div class="option-card" onclick="selectOptavikOption(1)">
-                <div class="option-title">Вариант 1</div>
-                <div class="option-discount">-10% / -5%</div>
-                <div class="option-desc">Sarbast PET: 10% | Другие Sarbast: 5%</div>
-            </div>
-            <div class="option-card" onclick="selectOptavikOption(2)">
-                <div class="option-title">Вариант 2</div>
-                <div class="option-discount">-5% / -5%</div>
-                <div class="option-desc">Все Sarbast: 5%</div>
-            </div>
-            <div class="option-card" onclick="selectOptavikOption(3)">
-                <div class="option-title">Вариант 3</div>
-                <div class="option-discount">-8% / -5%</div>
-                <div class="option-desc">Sarbast PET: 8% | Другие Sarbast: 5%</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Tarix modal oyna -->
-<div id="historyModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div class="modal-title">История Накладных</div>
-            <div class="close-modal" onclick="closeModal('historyModal')">×</div>
-        </div>
-        <div class="modal-body">
-            <div id="historyContent" class="history-list">
-                <!-- Tarix bu yerda ko'rsatiladi -->
-            </div>
-            <div class="modal-buttons">
-                <button class="modal-btn modal-btn-copy" onclick="clearHistory()">
-                    <span>🗑️</span> Очистить историю
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Fallback copy uchun -->
-<div id="copyFallback" class="copy-fallback">
-    <textarea id="copyTextarea" class="copy-textarea"></textarea>
-</div>
-
-<div class="notification" id="notification">
-    Natija nusxalandi!
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+  <button class="nav-btn active" onclick="showPage('products',this)" id="nav-products">
+    <span class="icon">🛒</span>
+    Mahsulotlar
+    <span class="badge" id="cart-badge" style="display:none">0</span>
+  </button>
+  <button class="nav-btn" onclick="showPage('nakladnoy',this)" id="nav-nakladnoy">
+    <span class="icon">📋</span>
+    Nakładnoy
+  </button>
+  <button class="nav-btn" onclick="showPage('optoviy',this)" id="nav-optoviy">
+    <span class="icon">🏷️</span>
+    Optoviy
+  </button>
+  <button class="nav-btn" onclick="showPage('history',this)" id="nav-history">
+    <span class="icon">📚</span>
+    Tarix
+  </button>
 </div>
 
 <script>
-// Telegram Bot sozlamalari
-const BOT_TOKEN = "8639293383:AAG6AiPG9oz8z6CI0wA1QkNsStNBrOX3H2s";
-const CHAT_ID = "855204630"; // SIZNING TELEGRAM ID INGIZNI QO'YING!!!
+// ── DATA ─────────────────────────────────────────────────────────
+const PRODUCTS = [
+  // PET
+  { id:'p1', name:'Sarbast Lite PET', vol:'1.5 litr', price:115479, cat:'PET', img:'https://i.ibb.co/bMzqRx18/sarbast-lite-pet.jpg', brand:'sarbast' },
+  { id:'p2', name:'Sarbast Original PET', vol:'1.5 litr', price:115479, cat:'PET', img:'https://i.ibb.co/S4kty86y/sarbast-original-pet.jpg', brand:'sarbast' },
+  { id:'p3', name:'Sarbast Special PET', vol:'1.5 litr', price:115479, cat:'PET', img:'https://i.ibb.co/WN56c5DV/sarbast-special-pet.jpg', brand:'sarbast' },
+  // RGB
+  { id:'r1', name:'Sarbast Lite RGB', vol:'0.5 litr', price:218077, cat:'RGB', img:'https://i.ibb.co/Df36mfB5/sarbast-lite-rgb.jpg', brand:'sarbast' },
+  { id:'r2', name:'Sarbast Original RGB', vol:'0.5 litr', price:218077, cat:'RGB', img:'https://i.ibb.co/CKB8Smqd/sarbast-original-rgb.jpg', brand:'sarbast' },
+  { id:'r3', name:'Sarbast Special RGB', vol:'0.5 litr', price:218077, cat:'RGB', img:'https://i.ibb.co/1Yh9rJzD/sarbast-special-rgb.jpg', brand:'sarbast' },
+  { id:'r4', name:'Tuborg Green RGB', vol:'0.5 litr', price:268307, cat:'RGB', img:'https://i.ibb.co/VWzV4mcZ/tuborg-green-rgb.jpg', brand:'tuborg' },
+  { id:'r5', name:'Tuborg Lite RGB', vol:'0.45 litr', price:268307, cat:'RGB', img:'https://i.ibb.co/HfgDGFrM/tuborg-lite-rgb.jpg', brand:'tuborg' },
+  { id:'r6', name:'Zatecky Gus Svetly RGB', vol:'0.47 litr', price:251632, cat:'RGB', img:'https://i.ibb.co/hxSDrBCM/zatecky-gus-svetly-rgb.jpg', brand:'zatecky' },
+  { id:'r7', name:'Zatecky Gus Exportniy RGB', vol:'0.47 litr', price:251632, cat:'RGB', img:'https://i.ibb.co/7J9mDKmr/zatecky-gus-exportniy-rgb.jpg', brand:'zatecky' },
+  { id:'r8', name:'Carlsberg Pilsner RGB', vol:'0.45 litr', price:301580, cat:'RGB', img:'https://i.ibb.co/vvjXWMB2/carlsberg-pilsner-rgb.jpg', brand:'carlsberg' },
+  // CAN
+  { id:'c1', name:'Sarbast Lite CAN', vol:'0.45 litr', price:241529, cat:'CAN', img:'https://i.ibb.co/przfWHxv/sarbast-lite-can.jpg', brand:'sarbast' },
+  { id:'c2', name:'Sarbast Original CAN', vol:'0.45 litr', price:241529, cat:'CAN', img:'https://i.ibb.co/4HjJZkb/sarbast-original-can.jpg', brand:'sarbast' },
+  { id:'c3', name:'Sarbast Original Unfiltered CAN', vol:'0.45 litr', price:241529, cat:'CAN', img:'https://i.ibb.co/0yZjC2C3/sarbast-original-unfiltered-can.jpg', brand:'sarbast' },
+  { id:'c4', name:'Sarbast Special CAN', vol:'0.45 litr', price:241529, cat:'CAN', img:'https://i.ibb.co/1t3Y7bZt/sarbast-special-can.jpg', brand:'sarbast' },
+  { id:'c5', name:'Tuborg Green CAN', vol:'0.45 litr', price:321968, cat:'CAN', img:'https://i.ibb.co/hJJdrTK7/tuborg-green-can.jpg', brand:'tuborg' },
+  { id:'c6', name:'Tuborg Lite CAN', vol:'0.45 litr', price:321968, cat:'CAN', img:'https://i.ibb.co/SXLx1T0S/tuborg-lite-can.jpg', brand:'tuborg' },
+  { id:'c7', name:'Zatecky Gus Svetly CAN', vol:'0.45 litr', price:301958, cat:'CAN', img:'https://i.ibb.co/KjyNrtH3/zatecky-gus-svetly-can.jpg', brand:'zatecky' },
+  { id:'c8', name:'Zatecky Gus Exportniy CAN', vol:'0.45 litr', price:301958, cat:'CAN', img:'https://i.ibb.co/wNFhH1MQ/zatecky-gus-exportniy-can.jpg', brand:'zatecky' },
+  { id:'c9', name:'Zatecky Gus Krepkiy CAN', vol:'0.45 litr', price:301958, cat:'CAN', img:'https://i.ibb.co/PsyfwQnh/zatecky-gus-krepkiy-can.jpg', brand:'zatecky' },
+  { id:'c10', name:'Zatecky Gus Nefiltrovaniy CAN', vol:'0.45 litr', price:301958, cat:'CAN', img:'https://i.ibb.co/sp7s7dP3/zatecky-gus-nefiltrovaniy-can.jpg', brand:'zatecky' },
+  { id:'c11', name:'Carlsberg Pilsner CAN', vol:'0.45 litr', price:361896, cat:'CAN', img:'https://i.ibb.co/xS20VDMg/carlsberg-pilsner-can.jpg', brand:'carlsberg' },
+];
 
-// Foydalanuvchi qurilmasi haqida ma'lumot olish
-function getDeviceInfo() {
-    const userAgent = navigator.userAgent;
-    let device = "Unknown";
-    
-    if (/iPhone/i.test(userAgent)) {
-        const match = userAgent.match(/iPhone OS (\d+)_/);
-        device = `iPhone (iOS ${match ? match[1] : '?'})`;
-    } else if (/iPad/i.test(userAgent)) {
-        device = "iPad";
-    } else if (/Android/i.test(userAgent)) {
-        const match = userAgent.match(/Android (\d+\.?\d*)/);
-        const brand = /Xiaomi/i.test(userAgent) ? "Xiaomi" :
-                     /Samsung/i.test(userAgent) ? "Samsung" :
-                     /Huawei/i.test(userAgent) ? "Huawei" :
-                     /OnePlus/i.test(userAgent) ? "OnePlus" :
-                     /Google/i.test(userAgent) ? "Google Pixel" :
-                     /Realme/i.test(userAgent) ? "Realme" :
-                     "Android";
-        device = `${brand} (Android ${match ? match[1] : '?'})`;
-    } else if (/Windows/i.test(userAgent)) {
-        device = "Windows PC";
-    } else if (/Macintosh/i.test(userAgent)) {
-        device = "Mac";
-    } else {
-        device = userAgent.split(' ')[0] || "Unknown";
-    }
-    
-    // Ekran o'lchami
-    const screen = `${window.screen.width}x${window.screen.height}`;
-    return `${device} | Экран: ${screen}`;
+// ── STATE ─────────────────────────────────────────────────────────
+let cart = {}; // { id: qty }
+let discountVariant = 0; // 0=none,1,2,3
+let currentCat = 'all';
+let history = JSON.parse(localStorage.getItem('sarbast-history') || '[]');
+
+// ── DISCOUNT LOGIC ────────────────────────────────────────────────
+function getDiscountRate(product) {
+  if (discountVariant === 0) return 0;
+  const isSarbast = product.brand === 'sarbast';
+  const isPET = product.cat === 'PET';
+  if (!isSarbast) return 0;
+  if (discountVariant === 1) return isPET ? 0.10 : 0.05;
+  if (discountVariant === 2) return 0.05;
+  if (discountVariant === 3) return isPET ? 0.08 : 0.05;
+  return 0;
 }
 
-// Telegram botga xabar yuborish (silent mode)
-async function sendToTelegram(type, total, productsList, dateTime) {
-    try {
-        const deviceInfo = getDeviceInfo();
-        
-        // Mahsulotlar ro'yxatini matnga aylantirish
-        let productsText = "";
-        productsList.forEach(p => {
-            productsText += `\n• ${p.name}: ${p.blocks} блок = ${p.sum.toLocaleString()} UZS`;
-            if (p.discountPercent) {
-                productsText += ` (скидка ${p.discountPercent}%)`;
-            }
-        });
-        
-        const message = `📊 НОВЫЙ ЗАКАЗ 📊
-━━━━━━━━━━━━━━━━━
-📱 Устройство: ${deviceInfo}
-📝 Тип: ${type}
-🕒 Время: ${dateTime}
-💰 Итого: ${total.toLocaleString()} UZS
-━━━━━━━━━━━━━━━━━
-📦 Товары:${productsText}
-━━━━━━━━━━━━━━━━━`;
-        
-        // Telegram API ga so'rov yuborish (fetch)
-        const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-        
-        // backgroundda yuborish, foydalanuvchi sezmaydi
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                chat_id: CHAT_ID,
-                text: message,
-                parse_mode: 'HTML',
-                disable_notification: false
-            })
-        }).catch(err => console.log("Telegram yuborishda xatolik:", err));
-        
-    } catch(e) {
-        console.log("Xatolik:", e);
-    }
+function getDiscountedPrice(product) {
+  const rate = getDiscountRate(product);
+  return Math.round(product.price * (1 - rate));
 }
 
-// O'zgaruvchilar
-const nakladnoyModal = document.getElementById('nakladnoyModal');
-const historyModal = document.getElementById('historyModal');
-const optavikOptionsModal = document.getElementById('optavikOptionsModal');
-const copyFallback = document.getElementById('copyFallback');
-const copyTextarea = document.getElementById('copyTextarea');
-const imageModal = document.getElementById('imageModal');
-const modalImage = document.getElementById('modalImage');
-let currentNakladnoyText = "";
-let nakladnoyHistory = [];
-let currentOptavikOption = 1;
-
-// Dastur yuklanganda tarixni yuklash
-document.addEventListener('DOMContentLoaded', function() {
-    loadHistory();
-});
-
-function showNakladnoyModal() {
-    generateNakladnoy();
-    nakladnoyModal.style.display = "block";
-    document.getElementById('modalTitle').textContent = "НАКЛАДНОЙ";
+// ── FORMAT ────────────────────────────────────────────────────────
+function fmt(n) {
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
 }
 
-function showOptavikOptions() {
-    optavikOptionsModal.style.display = "block";
-}
+// ── RENDER PRODUCTS ───────────────────────────────────────────────
+function renderProducts() {
+  const cats = ['PET','RGB','CAN'];
+  let html = '';
 
-function selectOptavikOption(option) {
-    currentOptavikOption = option;
-    closeModal('optavikOptionsModal');
-    generateOptavik(option);
-    nakladnoyModal.style.display = "block";
-    
-    let title = "";
-    switch(option) {
-        case 1: title = "НАКЛАДНОЙ (Оптовик -10%/-5%)"; break;
-        case 2: title = "НАКЛАДНОЙ (Оптовик -5%/-5%)"; break;
-        case 3: title = "НАКЛАДНОЙ (Оптовик -8%/-5%)"; break;
-    }
-    document.getElementById('modalTitle').textContent = title;
-}
-
-function showHistoryModal() {
-    displayHistory();
-    historyModal.style.display = "block";
-}
-
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = "none";
-}
-
-function openTab(id) {
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-    
-    const tabs = document.querySelectorAll('.tab');
-    for(let tab of tabs) {
-        if(tab.getAttribute('onclick') && tab.getAttribute('onclick').includes(id)) {
-            tab.classList.add('active');
-            break;
-        }
-    }
-    
-    document.getElementById(id).classList.add('active');
-}
-
-function openImageModal(src) {
-    modalImage.src = src;
-    imageModal.style.display = "block";
-}
-
-function closeImageModal() {
-    imageModal.style.display = "none";
-}
-
-document.querySelectorAll('input').forEach(input => {
-    input.addEventListener('focus', function() {
-        if(this.value=="0") this.value="";
+  cats.forEach(cat => {
+    if (currentCat !== 'all' && currentCat !== cat) return;
+    const items = PRODUCTS.filter(p => p.cat === cat);
+    html += `<div class="section-title">${cat} Mahsulotlari</div>
+             <div class="product-grid">`;
+    items.forEach(p => {
+      const inCart = cart[p.id] > 0;
+      const disc = getDiscountedPrice(p);
+      const hasDisc = disc !== p.price;
+      html += `
+        <div class="product-card ${inCart?'selected':''}" onclick="toggleProduct('${p.id}')" id="card-${p.id}">
+          <div class="check">✓</div>
+          <img src="${p.img}" alt="${p.name}" loading="lazy" />
+          <div class="info">
+            <div class="pname">${p.name}</div>
+            <div class="pvol">${p.vol}</div>
+            <div class="pprice">${hasDisc ? `<span style="text-decoration:line-through;color:#666;font-size:10px">${fmt(p.price)}</span> ${fmt(disc)}` : fmt(p.price)} UZS</div>
+          </div>
+        </div>`;
     });
-    input.addEventListener('blur', function() {
-        if(this.value=="") this.value="0";
-    });
-    
-    input.addEventListener('keyup', function(e) {
-        if(e.key === 'Enter') {
-            showNakladnoyModal();
-        }
-    });
-});
+    html += '</div>';
+  });
 
-function formatNumber(n) {
-    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  document.getElementById('product-list').innerHTML = html;
 }
 
-function getCurrentDateTime() {
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, '0');
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const year = now.getFullYear();
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    const seconds = String(now.getSeconds()).padStart(2, '0');
-    return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+function filterCat(cat, btn) {
+  currentCat = cat;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProducts();
 }
 
-// Nakladnoy yaratish (oddiy - chegirmasiz)
-function generateNakladnoy() {
-    const dateTime = getCurrentDateTime();
-    document.getElementById('modalDateTime').textContent = `Дата: ${dateTime}`;
-    
-    let content = "";
-    let total = 0;
-    let hasProducts = false;
-    let selectedProducts = [];
-    
-    let petProducts = [];
-    let petTotal = 0;
-    let rgbProducts = [];
-    let rgbTotal = 0;
-    let canProducts = [];
-    let canTotal = 0;
-    
-    document.querySelectorAll('input').forEach(i => {
-        let blocks = parseInt(i.value);
-        if(blocks > 0) {
-            hasProducts = true;
-            let sum = blocks * parseInt(i.dataset.sum);
-            let productInfo = {
-                name: i.dataset.name,
-                blocks: blocks,
-                price: parseInt(i.dataset.sum),
-                sum: sum,
-                discount: 0
-            };
-            
-            selectedProducts.push({
-                name: i.dataset.name,
-                blocks: blocks,
-                price: parseInt(i.dataset.sum),
-                sum: sum
-            });
-            
-            if(i.dataset.name.includes("PET")) {
-                petProducts.push(productInfo);
-                petTotal += sum;
-            } else if(i.dataset.name.includes("RGB")) {
-                rgbProducts.push(productInfo);
-                rgbTotal += sum;
-            } else if(i.dataset.name.includes("CAN")) {
-                canProducts.push(productInfo);
-                canTotal += sum;
-            }
-            
-            total += sum;
-        }
-    });
-    
-    if(!hasProducts) {
-        content = "Hech qanday mahsulot tanlanmadi!\nBlok sonini kiriting.";
-        document.getElementById('modalTotal').textContent = "";
-    } else {
-        if(petProducts.length > 0) {
-            content += "=== PET ===\n";
-            petProducts.forEach(p => {
-                content += `${p.name}\n`;
-                content += `Блок: ${p.blocks} × ${formatNumber(p.price)} = ${formatNumber(p.sum)} UZS\n\n`;
-            });
-        }
-        
-        if(rgbProducts.length > 0) {
-            content += "=== RGB ===\n";
-            rgbProducts.forEach(p => {
-                content += `${p.name}\n`;
-                content += `Блок: ${p.blocks} × ${formatNumber(p.price)} = ${formatNumber(p.sum)} UZS\n\n`;
-            });
-        }
-        
-        if(canProducts.length > 0) {
-            content += "=== CAN ===\n";
-            canProducts.forEach(p => {
-                content += `${p.name}\n`;
-                content += `Блок: ${p.blocks} × ${formatNumber(p.price)} = ${formatNumber(p.sum)} UZS\n\n`;
-            });
-        }
-        
-        content += "---\n";
-        document.getElementById('modalTotal').textContent = `ИТОГО: ${formatNumber(total)} UZS`;
-        
-        // Telegramga yuborish (foydalanuvchi sezmaydi)
-        sendToTelegram("НАКЛАДНОЙ", total, selectedProducts, dateTime);
-    }
-    
-    document.getElementById('modalNakladnoyContent').innerText = content;
-    
-    if(hasProducts) {
-        const nakladnoyData = {
-            id: Date.now(),
-            type: "Накладной",
-            date: dateTime,
-            content: content,
-            total: total,
-            products: selectedProducts,
-            fullText: `НАКЛАДНОЙ\n\nДата: ${dateTime}\n\n${content}\nИТОГО: ${formatNumber(total)} UZS`
-        };
-        
-        saveToHistory(nakladnoyData);
-        currentNakladnoyText = nakladnoyData.fullText;
-    } else {
-        currentNakladnoyText = "";
-    }
+// ── TOGGLE PRODUCT ────────────────────────────────────────────────
+function toggleProduct(id) {
+  if (cart[id]) {
+    delete cart[id];
+  } else {
+    cart[id] = 1;
+  }
+  updateCartBadge();
+  renderProducts();
+  renderNakladnoy();
 }
 
-// Optavik yaratish
-function generateOptavik(option) {
-    const dateTime = getCurrentDateTime();
-    document.getElementById('modalDateTime').textContent = `Дата: ${dateTime}`;
-    
-    let content = "";
-    let total = 0;
-    let hasProducts = false;
-    let selectedProducts = [];
-    
-    let petProducts = [];
-    let rgbProducts = [];
-    let canProducts = [];
-    
-    document.querySelectorAll('input').forEach(i => {
-        let blocks = parseInt(i.value);
-        if(blocks > 0) {
-            hasProducts = true;
-            let sum = blocks * parseInt(i.dataset.sum);
-            let discount = 0;
-            let discountPercent = 0;
-            let isSarbastPet = i.dataset.name === "Sarbast Lite PET" || 
-                               i.dataset.name === "Sarbast Original PET" || 
-                               i.dataset.name === "Sarbast Special PET";
-            let isSarbast = i.dataset.name.includes("Sarbast");
-            
-            switch(option) {
-                case 1:
-                    if(isSarbastPet) {
-                        discountPercent = 10;
-                        discount = Math.round(sum * 0.10);
-                        sum = sum - discount;
-                    } else if(isSarbast) {
-                        discountPercent = 5;
-                        discount = Math.round(sum * 0.05);
-                        sum = sum - discount;
-                    }
-                    break;
-                case 2:
-                    if(isSarbast) {
-                        discountPercent = 5;
-                        discount = Math.round(sum * 0.05);
-                        sum = sum - discount;
-                    }
-                    break;
-                case 3:
-                    if(isSarbastPet) {
-                        discountPercent = 8;
-                        discount = Math.round(sum * 0.08);
-                        sum = sum - discount;
-                    } else if(isSarbast) {
-                        discountPercent = 5;
-                        discount = Math.round(sum * 0.05);
-                        sum = sum - discount;
-                    }
-                    break;
-            }
-            
-            let productInfo = {
-                name: i.dataset.name,
-                blocks: blocks,
-                price: parseInt(i.dataset.sum),
-                sum: sum,
-                discount: discount,
-                discountPercent: discountPercent
-            };
-            
-            selectedProducts.push({
-                name: i.dataset.name,
-                blocks: blocks,
-                price: parseInt(i.dataset.sum),
-                sum: sum,
-                discountPercent: discountPercent
-            });
-            
-            if(i.dataset.name.includes("PET")) {
-                petProducts.push(productInfo);
-            } else if(i.dataset.name.includes("RGB")) {
-                rgbProducts.push(productInfo);
-            } else if(i.dataset.name.includes("CAN")) {
-                canProducts.push(productInfo);
-            }
-            
-            total += sum;
-        }
-    });
-    
-    if(!hasProducts) {
-        content = "Hech qanday mahsulot tanlanmadi!\nBlok sonini kiriting.";
-        document.getElementById('modalTotal').textContent = "";
-    } else {
-        if(petProducts.length > 0) {
-            content += "=== PET ===\n";
-            petProducts.forEach(p => {
-                content += `${p.name}\n`;
-                if(p.discount > 0) {
-                    content += `Блок: ${p.blocks} × ${formatNumber(p.price)} = ${formatNumber(p.sum)} UZS (-${p.discountPercent}%)\n\n`;
-                } else {
-                    content += `Блок: ${p.blocks} × ${formatNumber(p.price)} = ${formatNumber(p.sum)} UZS\n\n`;
-                }
-            });
-        }
-        
-        if(rgbProducts.length > 0) {
-            content += "=== RGB ===\n";
-            rgbProducts.forEach(p => {
-                content += `${p.name}\n`;
-                if(p.discount > 0) {
-                    content += `Блок: ${p.blocks} × ${formatNumber(p.price)} = ${formatNumber(p.sum)} UZS (-${p.discountPercent}%)\n\n`;
-                } else {
-                    content += `Блок: ${p.blocks} × ${formatNumber(p.price)} = ${formatNumber(p.sum)} UZS\n\n`;
-                }
-            });
-        }
-        
-        if(canProducts.length > 0) {
-            content += "=== CAN ===\n";
-            canProducts.forEach(p => {
-                content += `${p.name}\n`;
-                if(p.discount > 0) {
-                    content += `Блок: ${p.blocks} × ${formatNumber(p.price)} = ${formatNumber(p.sum)} UZS (-${p.discountPercent}%)\n\n`;
-                } else {
-                    content += `Блок: ${p.blocks} × ${formatNumber(p.price)} = ${formatNumber(p.sum)} UZS\n\n`;
-                }
-            });
-        }
-        
-        content += "---\n";
-        document.getElementById('modalTotal').textContent = `ИТОГО: ${formatNumber(total)} UZS`;
-        
-        let typeName = "";
-        switch(option) {
-            case 1: typeName = "Оптовик (-10%/-5%)"; break;
-            case 2: typeName = "Оптовик (-5%/-5%)"; break;
-            case 3: typeName = "Оптовик (-8%/-5%)"; break;
-        }
-        
-        // Telegramga yuborish
-        sendToTelegram(typeName, total, selectedProducts, dateTime);
-    }
-    
-    document.getElementById('modalNakladnoyContent').innerText = content;
-    
-    if(hasProducts) {
-        let typeName = "";
-        switch(option) {
-            case 1: typeName = "Оптовик (-10%/-5%)"; break;
-            case 2: typeName = "Оптовик (-5%/-5%)"; break;
-            case 3: typeName = "Оптовик (-8%/-5%)"; break;
-        }
-        
-        const nakladnoyData = {
-            id: Date.now(),
-            type: typeName,
-            date: dateTime,
-            content: content,
-            total: total,
-            products: selectedProducts,
-            fullText: `${typeName}\n\nДата: ${dateTime}\n\n${content}\nИТОГО: ${formatNumber(total)} UZS`
-        };
-        
-        saveToHistory(nakladnoyData);
-        currentNakladnoyText = nakladnoyData.fullText;
-    } else {
-        currentNakladnoyText = "";
-    }
+function updateCartBadge() {
+  const count = Object.keys(cart).length;
+  const badge = document.getElementById('cart-badge');
+  if (count > 0) {
+    badge.style.display = 'flex';
+    badge.textContent = count;
+  } else {
+    badge.style.display = 'none';
+  }
 }
 
-function saveToHistory(nakladnoyData) {
-    nakladnoyHistory.unshift(nakladnoyData);
-    if (nakladnoyHistory.length > 50) {
-        nakladnoyHistory = nakladnoyHistory.slice(0, 50);
-    }
-    localStorage.setItem('nakladnoyHistory', JSON.stringify(nakladnoyHistory));
+// ── RENDER NAKŁADNOY ──────────────────────────────────────────────
+function renderNakladnoy() {
+  const ids = Object.keys(cart);
+  const container = document.getElementById('nakladnoy-items');
+  const totalBox = document.getElementById('total-box');
+  const actionRow = document.getElementById('action-row');
+
+  if (ids.length === 0) {
+    container.innerHTML = `<div class="empty-state">
+      <div class="icon">📦</div>
+      <p>Hali mahsulot tanlanmagan.<br>Mahsulotlar bo'limiga o'ting.</p>
+    </div>`;
+    totalBox.style.display = 'none';
+    actionRow.style.display = 'none';
+    return;
+  }
+
+  let html = '';
+  let totalBase = 0, totalFinal = 0, totalQty = 0;
+
+  ids.forEach(id => {
+    const p = PRODUCTS.find(x => x.id === id);
+    if (!p) return;
+    const qty = cart[id] || 1;
+    const disc = getDiscountedPrice(p);
+    totalBase += p.price * qty;
+    totalFinal += disc * qty;
+    totalQty += qty;
+
+    html += `
+      <div class="nakladnoy-item">
+        <img src="${p.img}" alt="${p.name}" loading="lazy" />
+        <div style="flex:1;min-width:0">
+          <div class="iname">${p.name}</div>
+          <div class="iprice">${fmt(disc)} UZS/blok</div>
+        </div>
+        <div class="qty-control">
+          <button class="qty-btn" onclick="changeQty('${id}',-1)">−</button>
+          <input class="qty-val" type="number" value="${qty}" min="1"
+            onchange="setQty('${id}',this.value)" onclick="this.select()" />
+          <button class="qty-btn" onclick="changeQty('${id}',1)">+</button>
+        </div>
+        <button class="remove-btn" onclick="removeItem('${id}')">🗑</button>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+
+  // Total
+  const discountAmt = totalBase - totalFinal;
+  document.getElementById('total-qty').textContent = totalQty + ' blok';
+  document.getElementById('total-base').textContent = fmt(totalBase) + ' UZS';
+  document.getElementById('total-discount').textContent = '-' + fmt(discountAmt) + ' UZS';
+  document.getElementById('total-final').textContent = fmt(totalFinal) + ' UZS';
+
+  const discRow = document.getElementById('discount-row');
+  discRow.style.display = discountAmt > 0 ? 'flex' : 'none';
+
+  totalBox.style.display = 'block';
+  actionRow.style.display = 'flex';
 }
 
-function loadHistory() {
-    const savedHistory = localStorage.getItem('nakladnoyHistory');
-    if (savedHistory) {
-        nakladnoyHistory = JSON.parse(savedHistory);
-    }
+function changeQty(id, delta) {
+  cart[id] = Math.max(1, (cart[id] || 1) + delta);
+  renderNakladnoy();
 }
 
-function displayHistory() {
-    const historyContent = document.getElementById('historyContent');
-    if (nakladnoyHistory.length === 0) {
-        historyContent.innerHTML = '<div class="empty-message">История пуста</div>';
-        return;
-    }
-    let html = '';
-    nakladnoyHistory.forEach(item => {
-        html += `
-            <div class="history-item" onclick="viewHistoryItem(${item.id})">
-                <div class="history-date">${item.date}</div>
-                <div class="history-type">${item.type}</div>
-                <div class="history-total">${formatNumber(item.total)} UZS</div>
-            </div>
-        `;
-    });
-    historyContent.innerHTML = html;
+function setQty(id, val) {
+  const n = parseInt(val);
+  if (n >= 1) { cart[id] = n; renderNakladnoy(); }
 }
 
-function viewHistoryItem(id) {
-    const item = nakladnoyHistory.find(i => i.id === id);
-    if (item) {
-        document.getElementById('modalTitle').textContent = item.type;
-        document.getElementById('modalDateTime').textContent = `Дата: ${item.date}`;
-        document.getElementById('modalNakladnoyContent').innerText = item.content;
-        document.getElementById('modalTotal').textContent = `ИТОГО: ${formatNumber(item.total)} UZS`;
-        currentNakladnoyText = item.fullText;
-        closeModal('historyModal');
-        nakladnoyModal.style.display = "block";
-    }
+function removeItem(id) {
+  delete cart[id];
+  updateCartBadge();
+  renderProducts();
+  renderNakladnoy();
+}
+
+// ── DISCOUNT ──────────────────────────────────────────────────────
+function setDiscount(variant, btn) {
+  discountVariant = variant;
+  document.querySelectorAll('.disc-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderProducts();
+  renderNakladnoy();
+}
+
+// ── COPY NAKŁADNOY ────────────────────────────────────────────────
+function copyNakladnoy() {
+  const ids = Object.keys(cart);
+  if (!ids.length) return;
+
+  const discNames = ['', 'Variant 1 (-10%/-5%)', 'Variant 2 (-5%/-5%)', 'Variant 3 (-8%/-5%)'];
+  let text = '📦 SARBAST NAKŁADNOY\n';
+  text += '━━━━━━━━━━━━━━━━━━\n';
+  if (discountVariant > 0) text += `🏷️ ${discNames[discountVariant]}\n`;
+  text += '\n';
+
+  let totalBase = 0, totalFinal = 0, totalQty = 0;
+  ids.forEach(id => {
+    const p = PRODUCTS.find(x => x.id === id);
+    if (!p) return;
+    const qty = cart[id] || 1;
+    const disc = getDiscountedPrice(p);
+    totalBase += p.price * qty;
+    totalFinal += disc * qty;
+    totalQty += qty;
+    text += `• ${p.name} — ${qty} blok × ${fmt(disc)} = ${fmt(disc * qty)} UZS\n`;
+  });
+
+  text += '\n━━━━━━━━━━━━━━━━━━\n';
+  text += `📦 Jami blok: ${totalQty}\n`;
+  if (totalBase !== totalFinal) {
+    text += `💰 Chegirmasiz: ${fmt(totalBase)} UZS\n`;
+    text += `🎁 Chegirma: -${fmt(totalBase - totalFinal)} UZS\n`;
+  }
+  text += `✅ JAMI: ${fmt(totalFinal)} UZS`;
+
+  navigator.clipboard.writeText(text).then(() => showToast('✅ Nakładnoy nusxalandi!')).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('✅ Nakładnoy nusxalandi!');
+  });
+}
+
+// ── SAVE HISTORY ──────────────────────────────────────────────────
+function saveToHistory() {
+  const ids = Object.keys(cart);
+  if (!ids.length) return;
+
+  let totalFinal = 0, totalQty = 0;
+  const items = ids.map(id => {
+    const p = PRODUCTS.find(x => x.id === id);
+    const qty = cart[id] || 1;
+    const disc = getDiscountedPrice(p);
+    totalFinal += disc * qty;
+    totalQty += qty;
+    return { name: p.name, qty, price: disc };
+  });
+
+  history.unshift({
+    date: new Date().toLocaleString('uz-UZ'),
+    items,
+    total: totalFinal,
+    totalQty,
+    discount: discountVariant
+  });
+
+  if (history.length > 50) history = history.slice(0, 50);
+  localStorage.setItem('sarbast-history', JSON.stringify(history));
+  showToast('💾 Tarixga saqlandi!');
+  renderHistory();
+}
+
+// ── RENDER HISTORY ────────────────────────────────────────────────
+function renderHistory() {
+  const container = document.getElementById('history-list');
+  if (!history.length) {
+    container.innerHTML = `<div class="empty-state"><div class="icon">📚</div><p>Tarix bo'sh</p></div>`;
+    return;
+  }
+
+  let html = `<button class="clear-hist-btn" onclick="clearHistory()">🗑️ Tarixni tozalash</button>`;
+  history.forEach((h, i) => {
+    const itemStr = h.items.map(it => `${it.name} ×${it.qty}`).join(', ');
+    html += `
+      <div class="hist-item">
+        <div class="hist-date">📅 ${h.date}</div>
+        <div class="hist-items">${itemStr}</div>
+        <div class="hist-total">Jami: ${fmt(h.total)} UZS (${h.totalQty} blok)</div>
+        <div class="hist-actions">
+          <button class="hist-btn primary" onclick="loadHistory(${i})">📥 Yuklash</button>
+          <button class="hist-btn" onclick="copyHistoryItem(${i})">📋 Nusxa</button>
+          <button class="hist-btn" onclick="deleteHistory(${i})" style="color:#e74c3c">🗑</button>
+        </div>
+      </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function loadHistory(i) {
+  const h = history[i];
+  cart = {};
+  h.items.forEach(it => {
+    const p = PRODUCTS.find(x => x.name === it.name);
+    if (p) cart[p.id] = it.qty;
+  });
+  discountVariant = h.discount || 0;
+  document.querySelectorAll('.disc-btn').forEach((b,bi) => {
+    b.classList.toggle('active', bi === discountVariant);
+  });
+  updateCartBadge();
+  renderProducts();
+  renderNakladnoy();
+  showPage('nakladnoy', document.getElementById('nav-nakladnoy'));
+  showToast('📥 Tarixdan yuklandi!');
+}
+
+function copyHistoryItem(i) {
+  const h = history[i];
+  let text = `📦 SARBAST NAKŁADNOY\n📅 ${h.date}\n━━━━━━━━━━━━━━━━━━\n`;
+  h.items.forEach(it => {
+    text += `• ${it.name} — ${it.qty} blok × ${fmt(it.price)} = ${fmt(it.price * it.qty)} UZS\n`;
+  });
+  text += `━━━━━━━━━━━━━━━━━━\n✅ JAMI: ${fmt(h.total)} UZS (${h.totalQty} blok)`;
+  navigator.clipboard.writeText(text).catch(() => {});
+  showToast('📋 Nusxalandi!');
+}
+
+function deleteHistory(i) {
+  history.splice(i, 1);
+  localStorage.setItem('sarbast-history', JSON.stringify(history));
+  renderHistory();
 }
 
 function clearHistory() {
-    if (confirm("Вы уверены, что хотите очистить всю историю?")) {
-        nakladnoyHistory = [];
-        localStorage.removeItem('nakladnoyHistory');
-        displayHistory();
-        showNotification("История очищена!");
-    }
+  if (confirm('Barcha tarixni o\'chirasizmi?')) {
+    history = [];
+    localStorage.setItem('sarbast-history', JSON.stringify(history));
+    renderHistory();
+  }
 }
 
+// ── PRICE LIST ────────────────────────────────────────────────────
+function renderPriceList() {
+  const cats = ['PET','RGB','CAN'];
+  let html = '';
+  cats.forEach(cat => {
+    html += `<div class="opt-card"><h3>${cat}</h3>`;
+    PRODUCTS.filter(p => p.cat === cat).forEach(p => {
+      html += `<div class="opt-row"><span class="name">${p.name} (${p.vol})</span><span class="disc">${fmt(p.price)} UZS</span></div>`;
+    });
+    html += '</div>';
+  });
+  document.getElementById('price-list').innerHTML = html;
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  btn.classList.add('active');
+
+  const tabs = document.getElementById('product-tabs');
+  tabs.style.display = name === 'products' ? 'flex' : 'none';
+
+  if (name === 'history') renderHistory();
+  if (name === 'nakladnoy') renderNakladnoy();
+}
+
+// ── RESET ─────────────────────────────────────────────────────────
 function resetAll() {
-    if (confirm("Вы уверены, что хотите сбросить все данные?")) {
-        document.querySelectorAll('input').forEach(input => {
-            input.value = "0";
-        });
-        showNotification("Все данные сброшены!");
-    }
+  if (Object.keys(cart).length === 0) return;
+  if (confirm('Nakładnoyni tozalaysizmi?')) {
+    cart = {};
+    updateCartBadge();
+    renderProducts();
+    renderNakladnoy();
+    showToast('🔄 Tozalandi!');
+  }
 }
 
-function copyNakladnoy() {
-    if(!currentNakladnoyText || currentNakladnoyText.includes("Hech qanday mahsulot tanlanmadi")) {
-        showNotification("Nusxalash uchun ma'lumot yo'q!", true);
-        return;
-    }
-    if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(currentNakladnoyText).then(() => {
-            showNotification("Накладной nusxalandi!");
-        }).catch(err => {
-            fallbackCopyText(currentNakladnoyText);
-        });
-    } else {
-        fallbackCopyText(currentNakladnoyText);
-    }
+// ── TOAST ─────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-function fallbackCopyText(text) {
-    copyTextarea.value = text;
-    copyTextarea.style.display = 'block';
-    copyFallback.style.display = 'flex';
-    copyTextarea.select();
-    copyTextarea.setSelectionRange(0, 99999);
-    try {
-        const successful = document.execCommand('copy');
-        if (successful) {
-            showNotification("Накладной nusxalandi!");
-        } else {
-            showNotification("Nusxalash amalga oshmadi!", true);
-        }
-    } catch (err) {
-        showNotification("Nusxalashda xatolik!", true);
-        copyTextarea.focus();
-        return;
-    }
-    setTimeout(() => {
-        copyFallback.style.display = 'none';
-        copyTextarea.style.display = 'none';
-    }, 1000);
+// ── PWA INSTALL ───────────────────────────────────────────────────
+let deferredPrompt;
+function installPWA() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; hideBanner(); });
+  }
+}
+function hideBanner() {
+  document.getElementById('install-banner').style.display = 'none';
+  localStorage.setItem('sarbast-install-dismissed', '1');
 }
 
-copyFallback.addEventListener('click', function(e) {
-    if (e.target === copyFallback) {
-        copyFallback.style.display = 'none';
-    }
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (!localStorage.getItem('sarbast-install-dismissed')) {
+    document.getElementById('install-banner').style.display = 'flex';
+  }
 });
 
-function showNotification(message, isError = false) {
-    const notification = document.getElementById('notification');
-    notification.textContent = message;
-    if (isError) {
-        notification.classList.add('error');
-    } else {
-        notification.classList.remove('error');
-    }
-    notification.classList.add('show');
-    setTimeout(() => {
-        notification.classList.remove('show');
-    }, 3000);
+// ── SERVICE WORKER ────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
-window.onclick = function(event) {
-    if (event.target == nakladnoyModal) {
-        nakladnoyModal.style.display = "none";
-    }
-    if (event.target == historyModal) {
-        historyModal.style.display = "none";
-    }
-    if (event.target == optavikOptionsModal) {
-        optavikOptionsModal.style.display = "none";
-    }
-    if (event.target == imageModal) {
-        closeImageModal();
-    }
-}
-
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        nakladnoyModal.style.display = "none";
-        historyModal.style.display = "none";
-        optavikOptionsModal.style.display = "none";
-        copyFallback.style.display = "none";
-        closeImageModal();
-    }
-});
+// ── INIT ──────────────────────────────────────────────────────────
+renderProducts();
+renderPriceList();
+document.getElementById('product-tabs').style.display = 'flex';
 </script>
 </body>
 </html>
